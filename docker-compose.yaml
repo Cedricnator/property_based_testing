@@ -1,5 +1,5 @@
 services:
-  db-property-basedtesting:
+  db-property-based-testing:
     hostname: db.property.basedtesting.local
     container_name: db.property.basedtesting.local
     image: postgres:15.4-alpine
@@ -17,20 +17,20 @@ services:
     ports:
       - '36000:5432'
     volumes: 
-      - db-property-basedtesting:/var/lib/postgresql/data
+      - db-property-based-testing:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   backend-property-based-testing:
-    hostname: backend.signature.project_management.local
-    container_name: backend.signature.project_management.local
+    hostname: backend.property.project_management.local
+    container_name: backend.property.project_management.local
     build:
       context: .
       dockerfile: build/Dockerfile
     depends_on:
-      db-signature-project-management:  
+      db-property-based-testing:  
         condition: service_healthy
     environment:
-      DB_HOST: db-property-basedtesting  
+      DB_HOST: db-property-based-testing  
       DB_PORT: 5432
       DB_NAME: property_basedtesting 
       JWT_SECRET: 'secreto'
@@ -39,6 +39,6 @@ services:
       - "37000:3000"
 
 volumes:
-  db-signature-project-management:  
+  db-property-based-testing:  
     driver: local
 
