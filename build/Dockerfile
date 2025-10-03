@@ -1,32 +1,19 @@
-FROM node:23-slim AS base
-
-FROM base AS prod
-
-RUN useradd -Umrd /app app && \
-    chown -R app:app /app
+# Build dependencies
+FROM node:22-alpine AS builder
 WORKDIR /app
-USER app
-
-COPY --chown=app:app package.json package-lock.json ./
-COPY --chown=app:app . .
-
-ENV NODE_ENV=test
-RUN npm install --save-dev jest
-# RUN npm test
-
-ENV NODE_ENV=production
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npx prisma generate
 RUN npm run build
 
-FROM base AS build
-
+# Production image
+FROM node:22-alpine
 WORKDIR /app
-
-COPY --chown=app:app --from=prod /app/node_modules /app/node_modules
-COPY --chown=app:app --from=prod /app/dist /app/dist
-
-ENV TZ=America/Santiago
-
-EXPOSE 3000
-
-ENV NODE_ENV production
-CMD [ "node", "/app/dist/main.js" ]
+ENV NODE_ENV=production
+COPY package*.json ./
+COPY prisma ./prisma
+RUN npm ci --omit=dev
+RUN npx prisma generate
+COPY --from=builder /app/dist ./dist
+CMD ["node", "dist/src/main.js"]

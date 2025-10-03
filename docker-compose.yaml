@@ -30,10 +30,7 @@ services:
       db-property-based-testing:  
         condition: service_healthy
     environment:
-      DB_HOST: db-property-based-testing  
-      DB_PORT: 5432
-      DB_NAME: property_basedtesting 
-      JWT_SECRET: 'secreto'
+      DATABASE_URL: postgresql://postgres:postgres@db-property-based-testing:5432/property_basedtesting 
       APP_ENV: staging
     ports:
       - "37000:3000"
