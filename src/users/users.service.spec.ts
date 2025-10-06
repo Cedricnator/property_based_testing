@@ -109,4 +109,23 @@ describe('UsersService (property tests)', () => {
       }),
     );
   });
+
+  // 6. DATA CONSISTENCY (Timestamps)
+  it('created users should have proper timestamps and be consistent', async () => {
+    await fc.assert(
+      fc.asyncProperty(createUserArb, async (dto) => {
+        await prisma.user.deleteMany();
+        const beforeCreate = new Date();
+        const user = await service.create(dto);
+        const afterCreate = new Date();
+        expect(user.createdAt).toBeDefined();
+        expect(user.updatedAt).toBeDefined();
+        const timeDiff = 1000;
+        expect(user.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime() - timeDiff);
+        expect(user.createdAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime() + timeDiff);
+        expect(user.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime() - timeDiff);
+        expect(user.updatedAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime() + timeDiff);
+      }),
+    );
+  });
 });
